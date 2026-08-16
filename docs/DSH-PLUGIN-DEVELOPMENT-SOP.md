@@ -173,9 +173,37 @@ git push origin master --tags
 | `Entry.update` threw | Check nested id (`include:` prefix), `isProtected`, loader state via list API. |
 | Locale not switching | Client `inject` includes `locale`; slot registers `locale: NS`. |
 | Setting a GitHub field with Chinese via PowerShell mangles it | Use Node `fetch` (UTF-8 safe), not PowerShell `Invoke-RestMethod`. |
+| Commit author shows a real email (e.g. `...@qq.com`) | GitHub API-created commits use the account's real email; rewrite history: `git filter-branch --env-filter` swapping to `users.noreply.github.com`, then `git push --force` master + tags, expire reflog, `git gc --prune=now`. 历史重写清除真实邮箱。 |
+| Chinese set via GitHub API garbled | Send the request from Node `fetch` (UTF-8 safe), never PowerShell. 用 Node 发 API 请求避免中文乱码。 |
 
 ## Security reminders / 安全提醒
 
 - npm recovery codes are one-time and sensitive — never share; rotate after any exposure. 恢复码一次性且敏感，暴露即轮换。
 - Prefer OIDC trusted publishing over long-lived tokens (npm is deprecating bypass-2FA tokens; direct publish dies ~Jan 2027). 优先 OIDC，npm 正弃用 bypass-2FA token。
 - No credentials, tokens, or local paths in committed files. 提交内容不含凭据与本机路径。
+- GitHub API-created commits may carry the account's REAL email (not the noreply alias) — check `git log --format='%ae'` before publishing, and rewrite history with `git filter-branch` if a real email leaked. GitHub API 创建的提交可能带真实邮箱而非 noreply 别名——发布前检查提交邮箱，泄露则用 filter-branch 重写历史。
+- Sensitive-info scan before every release: no local paths (`C:\Users\...`, `D:\...`), real emails, or token values; `5102a`-style GitHub usernames are expected in a public repo's metadata (author/repository), not sensitive. 每次发布前扫描敏感信息：无本机路径、真实邮箱、token 值；GitHub 用户名属公开仓库正常元数据。
+
+## Self-evolution protocol / 自进化协议
+
+This skill is a living document — every optimization you make to a DSH plugin project must feed back here so the next plugin ships faster. 本 skill 是活文档——每次对 DSH 插件项目做的优化都必须回流到这里，让下一个插件更快发布。
+
+**Trigger / 触发时机**: after completing ANY meaningful improvement, bug fix, or new capability in a DSH plugin — especially: 完成任何有意义的改进/修复/新能力后，特别是：
+- A new gotcha you hit and solved. 踩到并解决的新坑。
+- A new workflow step that saved time. 省时间的新流程。
+- A security or release improvement. 安全或发布改进。
+- A fix that required non-obvious investigation. 需要非显而易见调查的修复。
+
+**How to update / 更新方式**:
+1. Read this SKILL.md; find the matching section (Phase, Troubleshooting, Security, or add a new Phase). 读取本文件，定位对应章节。
+2. Add the lesson in the SAME bilingual style (English + 中文) — one line for tables, 1-3 lines for prose. 以同样双语风格补充（表格一行、正文 1-3 行）。
+3. Run the sync script to mirror it into the project copy: 运行同步脚本镜像到项目副本:
+   ```sh
+   node scripts/sync-skill.mjs   # in any DSH plugin repo that keeps docs/DSH-PLUGIN-DEVELOPMENT-SOP.md
+   ```
+   (Or copy `~/.dsh/skills/dsh-plugin-development/SKILL.md` → `<repo>/docs/DSH-PLUGIN-DEVELOPMENT-SOP.md` manually. 或手动复制。)
+4. Commit the updated skill if the repo keeps a copy; the global copy is authoritative. 仓库保留副本则提交；全局副本为准。
+
+**Evidence ledger / 经验台账** (append the latest experience each time): 每次追加最新经验：
+- 2026-08: OIDC trusted publishing (npm ≥11.5.1, no NODE_AUTH_TOKEN/registry-url), `npm trust github` CLI config, per-locale screenshots in npm tarball, social preview at `.github/social-preview.png`, structured ErrorCode for i18n, GitHub API commits leak real email → filter-branch rewrite, sensitive-info release scan. OIDC 自动发布、npm trust CLI、分语言截图入包、社交预览图、结构化错误码、API 提交泄露真实邮箱需重写历史、发布前敏感扫描。
+
