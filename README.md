@@ -24,6 +24,7 @@ Hot-toggle any installed plugin from the DeepSeek Harness Web settings page (Plu
   - Type: builtin framework / client UI / LLM / tools / session & storage / sandbox & exec / agent & planning / services & integration / other
   - Search + live count (filtered / total)
 - **Sorting**: recent-first (community plugins ahead) or by name.
+- **i18n**: the UI follows the DSH language preference (中文/English) via the official locale service (namespace `pluginHotToggle`, 39 balanced keys).
 
 ## Installation
 
