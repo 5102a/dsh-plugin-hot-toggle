@@ -101,6 +101,7 @@ dsh-plugin-hot-toggle/
 ├── scripts/verify-render.mjs # verify the 启停管理 tab rendered
 ├── scripts/debug-dom.mjs    # DOM/slot debugging helper
 ├── tests/patch.test.js  # unit tests (node:test)
+├── docs/DSH-PLUGIN-DEVELOPMENT-SOP.md  # end-to-end DSH plugin development SOP (bilingual)
 ├── .dsh/skills/dsh-plugin-hot-toggle/SKILL.md  # project skill: dev/build/publish SOP
 └── .github/workflows/ci.yml  # CI: build + artifact freshness + tests
 ```
