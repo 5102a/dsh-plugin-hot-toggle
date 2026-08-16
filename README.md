@@ -124,9 +124,13 @@ npm run check   # build + test in one step
 
 ## Publishing
 
+**Releases are fully automated via OIDC trusted publishing** — pushing a version tag triggers the Release workflow, which builds, tests, packs, publishes to npm (with provenance), and creates a GitHub Release. No npm token or manual 2FA is needed.
+
 ```sh
-npm run check && npm run build
-npm publish
+npm version 0.1.5 --no-git-tag-version   # bump version
+git commit -am "chore: release v0.1.5"
+git tag v0.1.5
+git push origin master --tags            # CI + Release workflow + npm publish (OIDC)
 ```
 
 > The name `dsh-plugin-hot-toggle` was verified available with `npm view` before release.

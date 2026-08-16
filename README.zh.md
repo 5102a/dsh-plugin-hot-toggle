@@ -124,9 +124,13 @@ npm run check   # build + test 一步到位
 
 ## 发布
 
+**发布已通过 OIDC trusted publishing 完全自动化**——推送版本 tag 即触发 Release 工作流：构建、测试、打包、发布 npm（含 provenance 供应链证明）、创建 GitHub Release。无需 npm token，无需手动 2FA。
+
 ```sh
-npm run check && npm run build
-npm publish
+npm version 0.1.5 --no-git-tag-version   # 升级版本
+git commit -am "chore: release v0.1.5"
+git tag v0.1.5
+git push origin master --tags            # 触发 CI + Release 工作流 + npm 发布（OIDC）
 ```
 
 > 包名 `dsh-plugin-hot-toggle` 发布前已用 `npm view` 确认可用。

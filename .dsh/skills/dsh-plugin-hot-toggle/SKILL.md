@@ -61,25 +61,26 @@ dsh-plugin-hot-toggle/
 
 ## Publishing SOP / 发布流程
 
+**Fully automated via OIDC trusted publishing — tag push is the whole release.** No npm token, no manual OTP. 发布完全自动化（OIDC trusted publishing）——推送 tag 即完成发布，无需 token、无需手动 OTP。
+
 1. **Preflight:** `npm run check`; `npm pack --dry-run` → expect exactly 10 files (LICENSE, README.md, README.zh.md, cordis.patch.yml, index.d.ts, index.js, lib/client.js, docs/screenshot-en.png, docs/screenshot-zh.png, package.json). 预检：check + pack 期望恰好 10 个文件（含两张多语言截图）。
-2. **Name availability** (first release only): `npm view dsh-plugin-hot-toggle` → 404 means free. 首次发布前确认包名空闲。
-3. **Tag + push:**
+2. **Bump version, commit, tag, push** (the release workflow does the rest): 升级版本、提交、打 tag、推送（Release 工作流完成其余全部）:
    ```sh
-   git tag v0.1.2
-   git push origin master --tags   # triggers CI + Release workflow
+   npm version 0.1.5 --no-git-tag-version
+   git commit -am "chore: release v0.1.5"
+   git tag v0.1.5
+   git push origin master --tags
    ```
-4. **Publish npm** (requires 2FA OTP — recovery code or browser security key):
-   ```sh
-   npm publish --otp=<recovery-code>
-   ```
-5. **Verify** the published artifact installs in a fresh profile (`dsh plugin --profile verify add ...` then `dsh --profile verify --dump-config`). 用临时 profile 验证发布产物可安装。
-6. **GitHub topics:** keep `dsh-plugin` (+ related) set so the repo appears under <https://github.com/topics/dsh-plugin>. 保持 topics 包含 `dsh-plugin`。
+   This triggers CI (3-OS × Node 18/20/22) + the Release workflow which: verifies bundle freshness, runs tests, syncs version to tag, `npm pack`, computes SHA-256, **publishes to npm via OIDC with provenance**, and creates the GitHub Release with the tarball + checksum. 推送触发 CI + Release 工作流：校验、测试、版本同步、pack、校验和、**OIDC 发布 npm（含 provenance）**、创建 GitHub Release。
+3. **Verify** npm (`npm view dsh-plugin-hot-toggle version`) and the GitHub Release assets; optionally install in a fresh profile (`dsh plugin --profile verify add ...` then `dsh --profile verify --dump-config`). 验证 npm 版本与 Release 产物；可选在临时 profile 实测安装。
+4. **GitHub topics:** keep `dsh-plugin` (+ related) set so the repo appears under <https://github.com/topics/dsh-plugin>. 保持 topics 包含 `dsh-plugin`。
 
 ### Known release notes / 已知发布要点
 
 - `dsh plugin add` may print an "unmet peer" warning for `@deepseek-ai/cordis` / `react`. Expected: DSH resolves them from its own install (flat fallback), same as official plugins. `dsh plugin add` 可能提示 peer 依赖警告，属预期（与官方插件一致）。
-- npm publish requires 2FA (`auth-and-writes`). Use a recovery code (`--otp`) or the browser security-key flow. npm 发布需 2FA，可用恢复码或浏览器安全密钥。
-- Recovery codes are one-time and sensitive — never share; rotate them after any exposure. 恢复码一次性且敏感，切勿分享；暴露后立即轮换。
+- **OIDC trusted publishing requires npm >= 11.5.1.** Node 22 ships npm 10.x, so the release workflow runs `npm install -g npm@latest` first. Do NOT set `NODE_AUTH_TOKEN` (even empty) and do NOT pass `registry-url` to setup-node — either makes npm skip OIDC detection and demand a legacy token (ENEEDAUTH). OIDC 发布要求 npm ≥ 11.5.1（Node 22 自带 10.x，工作流先升级）；不要设置 NODE_AUTH_TOKEN、不要给 setup-node 传 registry-url，否则 npm 会跳过 OIDC 报 ENEEDAUTH。
+- **Trusted publisher** is configured on npmjs.com via `npm trust github dsh-plugin-hot-toggle --file release.yml --repository 5102a/dsh-plugin-hot-toggle --allow-publish` (requires 2FA OTP once). Verify with `npm trust list`. 已通过 `npm trust github` 配置 trusted publisher（一次性）。
+- Recovery codes are one-time and sensitive — never share; rotate them after any exposure. The account 2FA is `auth-and-writes`; daily publishing no longer needs codes (OIDC), but they remain the account-recovery key. 恢复码一次性且敏感，切勿分享；账号 2FA 为 auth-and-writes；日常发布已走 OIDC 无需恢复码，但恢复码仍是账号找回钥匙，暴露后务必轮换。
 
 ## Screenshot SOP / 截图流程（README 图）
 
