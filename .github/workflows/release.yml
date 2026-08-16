@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify bundle is up to date
+        run: |
+          node scripts/build.mjs
+          git diff --exit-code -- lib/client.js || (echo "lib/client.js is stale — run npm run build and commit"; exit 1)
+      - name: Run tests
+        run: npm test
+      - name: Build release tarball
+        run: npm pack
+      - name: Compute SHA-256 checksum
+        run: sha256sum dsh-plugin-hot-toggle-*.tgz > SHA256SUMS.txt
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: dsh-plugin-hot-toggle ${{ github.ref_name }}
+          body: |
+            ## dsh-plugin-hot-toggle ${{ github.ref_name }}
+
+            Install from npm:
+            ```sh
+            dsh plugin --profile web add dsh-plugin-hot-toggle@${{ github.ref_name }}
+            ```
+
+            Or from this tarball:
+            ```sh
+            dsh plugin --profile web add ./dsh-plugin-hot-toggle-${{ github.ref_name }}.tgz
+            ```
+
+            > Requires 2FA on the npm account for direct publishing; this
+            > workflow attaches the verified tarball artifact to the release.
+          files: |
+            dsh-plugin-hot-toggle-*.tgz
+            SHA256SUMS.txt
