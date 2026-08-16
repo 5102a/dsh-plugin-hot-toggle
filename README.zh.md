@@ -98,6 +98,7 @@ dsh-plugin-hot-toggle/
 ├── scripts/verify-render.mjs # 验证「启停管理」标签页已渲染
 ├── scripts/debug-dom.mjs    # DOM/slot 调试辅助
 ├── tests/patch.test.js  # 单元测试（node:test）
+├── .dsh/skills/dsh-plugin-hot-toggle/SKILL.md  # 项目 skill：开发/构建/发布 SOP
 └── .github/workflows/ci.yml  # CI：构建 + 产物新鲜度检查 + 测试
 ```
 
