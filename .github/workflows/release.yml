@@ -19,7 +19,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          registry-url: 'https://registry.npmjs.org'
+          # No registry-url: that would write an _authToken line into
+          # .npmrc and make npm skip OIDC detection for trusted publishing.
       - name: Verify bundle is up to date
         run: |
           node scripts/build.mjs
@@ -37,14 +38,12 @@ jobs:
       # npm trusted publishing (OIDC): the npm CLI detects the GitHub OIDC
       # environment automatically and exchanges it for a short-lived publish
       # token — no NPM_TOKEN secret, no manual OTP, with provenance attached.
+      # Do NOT set NODE_AUTH_TOKEN here: an (even empty) value makes npm skip
+      # OIDC detection and demand a legacy token instead.
       # Requires the trusted publisher configured on npmjs.com for this repo
       # (workflow release.yml, allowed action: npm publish).
-      # NODE_AUTH_TOKEN is left unset; the CLI falls back to OIDC. The env
-      # var is declared defensively so a future token-based setup still works.
       - name: Publish to npm (OIDC trusted publishing)
         run: npm publish --provenance
-        env:
-          NODE_AUTH_TOKEN: ''
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
