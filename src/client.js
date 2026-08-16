@@ -60,6 +60,14 @@ const zh = {
   typeAgent: '代理与规划',
   typeService: '服务与集成',
   typeOther: '其他',
+  errContentType: '请求必须是 application/json',
+  errOriginMissing: '缺少 Origin 头，已拒绝（更新必须由 Web UI 发起）',
+  errOriginInvalid: 'Origin 头无效',
+  errOriginMismatch: 'Origin 与 Host 不一致，已拒绝',
+  errMissingEntryId: '缺少 entryId',
+  errProtected: '该插件是系统核心插件，禁止启停',
+  errNotFound: '接口不存在',
+  errInternal: '服务器内部错误',
 }
 
 /** English dictionary checked against the Chinese key set. */
@@ -103,6 +111,14 @@ const en = {
   typeAgent: 'Agent & Planning',
   typeService: 'Services & Integration',
   typeOther: 'Other',
+  errContentType: 'Request must be application/json',
+  errOriginMissing: 'Missing Origin header — rejected (update must come from the Web UI)',
+  errOriginInvalid: 'Invalid Origin header',
+  errOriginMismatch: 'Origin does not match Host — rejected',
+  errMissingEntryId: 'Missing entryId',
+  errProtected: 'This plugin is a system-core plugin and cannot be toggled',
+  errNotFound: 'Endpoint not found',
+  errInternal: 'Internal server error',
 }
 
 /** Same-origin JSON helper against the host HTTP API. */
@@ -192,6 +208,22 @@ const CSS = [
   '.hpt-toggle[data-enabled=true]{border-color:var(--dsw-alias-state-success-primary);color:var(--dsw-alias-state-success-primary)}',
 ].join('')
 
+/** Map a host error code to its i18n key; fall back to raw message. */
+function errorText(t, res) {
+  if (!res) return t('errInternal')
+  const codeKey = {
+    ERR_CONTENT_TYPE: 'errContentType',
+    ERR_ORIGIN_MISSING: 'errOriginMissing',
+    ERR_ORIGIN_INVALID: 'errOriginInvalid',
+    ERR_ORIGIN_MISMATCH: 'errOriginMismatch',
+    ERR_MISSING_ENTRY_ID: 'errMissingEntryId',
+    ERR_PROTECTED: 'errProtected',
+    ERR_NOT_FOUND: 'errNotFound',
+    ERR_INTERNAL: 'errInternal',
+  }[res.code]
+  return codeKey ? t(codeKey) : (res.error || t('errInternal'))
+}
+
 function PluginToggleTab(props) {
   const t = props.t || ((key) => key)
   const [state, setState] = React.useState({ status: 'loading', entries: [], error: null })
@@ -230,7 +262,7 @@ function PluginToggleTab(props) {
     }).then(
       (res) => {
         if (!res || !res.ok) {
-          setState((prev) => ({ ...prev, error: (res && res.error) || 'failed' }))
+          setState((prev) => ({ ...prev, error: errorText(t, res) }))
         } else {
           setState((prev) => ({
             ...prev,

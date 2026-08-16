@@ -48,9 +48,22 @@ export interface SetEnabledResponse {
   persisted: boolean
   /** Persistence failure message, when persisted is false. */
   persistError: string | null
-  /** Rejection reason, when ok is false. */
+  /** Structured error code, when ok is false. */
+  code?: ErrorCode
+  /** Human-readable rejection reason (English), when ok is false. */
   error?: string
 }
+
+/** Structured error codes returned by the API (localized by the Web UI). */
+export type ErrorCode =
+  | 'ERR_CONTENT_TYPE'
+  | 'ERR_ORIGIN_MISSING'
+  | 'ERR_ORIGIN_INVALID'
+  | 'ERR_ORIGIN_MISMATCH'
+  | 'ERR_MISSING_ENTRY_ID'
+  | 'ERR_PROTECTED'
+  | 'ERR_NOT_FOUND'
+  | 'ERR_INTERNAL'
 
 /**
  * Pure patch-file editor: merges one entry's `disabled` flag into the profile

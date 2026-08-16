@@ -159,17 +159,17 @@ function sendJson(res, status, body) {
  */
 function sameOriginGuard(req, body) {
   const contentType = String(req.headers['content-type'] ?? '').split(';')[0].trim().toLowerCase()
-  if (contentType !== 'application/json') return '请求必须是 application/json'
+  if (contentType !== 'application/json') return { code: 'ERR_CONTENT_TYPE', message: 'Request must be application/json' }
   const host = String(req.headers.host ?? '')
   const origin = String(req.headers.origin ?? '')
-  if (origin === '') return '缺少 Origin 头，已拒绝（更新必须由 Web UI 发起）'
+  if (origin === '') return { code: 'ERR_ORIGIN_MISSING', message: 'Missing Origin header — rejected (update must come from the Web UI)' }
   let originHost = ''
   try {
     originHost = new URL(origin).host
   } catch {
-    return 'Origin 头无效'
+    return { code: 'ERR_ORIGIN_INVALID', message: 'Invalid Origin header' }
   }
-  if (originHost !== host) return 'Origin 与 Host 不一致，已拒绝'
+  if (originHost !== host) return { code: 'ERR_ORIGIN_MISMATCH', message: 'Origin does not match Host — rejected' }
   return null
 }
 
@@ -232,18 +232,18 @@ export function apply(ctx) {
             const body = await readBody(req)
             const guard = sameOriginGuard(req, body)
             if (guard) {
-              sendJson(res, 403, { ok: false, error: guard })
+              sendJson(res, 403, { ok: false, code: guard.code, error: guard.message })
               return
             }
             const entryId = String(body?.entryId ?? '')
             const enabled = Boolean(body?.enabled)
             if (!entryId) {
-              sendJson(res, 400, { ok: false, error: 'missing entryId' })
+              sendJson(res, 400, { ok: false, code: 'ERR_MISSING_ENTRY_ID', error: 'missing entryId' })
               return
             }
             const entry = ctx.loader.resolve(entryId)
             if (isProtected(entry)) {
-              sendJson(res, 403, { ok: false, error: `entry ${entryId} 是系统核心插件，禁止启停` })
+              sendJson(res, 403, { ok: false, code: 'ERR_PROTECTED', error: `entry ${entryId} is a system-core plugin and cannot be toggled` })
               return
             }
             await entry.update({ disabled: !enabled })
@@ -273,9 +273,9 @@ export function apply(ctx) {
             })
             return
           }
-          sendJson(res, 404, { ok: false, error: 'not found' })
+          sendJson(res, 404, { ok: false, code: 'ERR_NOT_FOUND', error: 'not found' })
         } catch (error) {
-          sendJson(res, 500, { ok: false, error: error instanceof Error ? error.message : String(error) })
+          sendJson(res, 500, { ok: false, code: 'ERR_INTERNAL', error: error instanceof Error ? error.message : String(error) })
         }
       },
     }))
