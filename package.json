@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-hot-toggle",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Hot-toggle any installed plugin in DeepSeek Harness from the Web settings — instant apply, no restart, persisted. 在 DSH 设置页一键热启用/停用任意插件，立即生效、无需重启、状态持久化。",
   "type": "module",
   "main": "./index.js",
