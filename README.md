@@ -13,6 +13,8 @@ Hot-toggle any installed plugin from the Web settings page (Plugins → 启停�
 
 ## 功能特性
 
+![启停管理界面](./docs/screenshot.png)
+
 - **热启停**：调用 Cordis Loader 官方 `Entry.update({ disabled })`——停用即 dispose 插件 fiber，启用即重新 import 启动，进程内立即生效，无需重启 DSH。
 - **持久化**：启停状态写入当前 profile 的用户 patch 层（`$DSH_HOME/profiles/<profile>/cordis.patch.yml`），由官方 HMR watcher 保存即热应用，**重启后保持**。
 - **安全保护**：`include`、`cordis:*`、loader/hmr/timer、动态插件宿主等系统核心条目禁止启停（标红「系统核心」）。
