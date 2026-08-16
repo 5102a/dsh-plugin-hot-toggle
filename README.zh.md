@@ -47,6 +47,20 @@ dsh plugin --profile web add github:5102a/dsh-plugin-hot-toggle
 
 安装后启动 DSH（或由 HMR 热应用），打开 **设置 → 插件 → 启停管理** 即可使用。
 
+## 跨平台支持
+
+插件支持 **Windows、macOS、Linux** 三大平台（与 DeepSeek Harness 官方支持范围一致）。
+
+| 关注点 | 保证 |
+| --- | --- |
+| Node half | 所有文件系统路径均通过 `node:path`（`join`/`dirname`）与 `fileURLToPath`，无硬编码分隔符 |
+| 持久化 | patch 层写入使用 `readFileSync`/`writeFileSync(…, 'utf8')`，路径由 Loader include 推导 |
+| HTTP API | `/plugin-hot-toggle/api/*` 是 URL 路由，与平台无关 |
+| Web half | 纯浏览器 `fetch` + React，无 `process.platform`/`navigator.platform` 分支 |
+| 构建 | `scripts/build.mjs` 通过 `import.meta.url` + `fileURLToPath` + `join` 解析路径 |
+| 开发工具 | Chrome/Edge 发现支持 `CHROME_PATH`/`CHROME_BIN` 环境变量或跨平台候选列表；`DSH_URL` 可覆盖目标地址 |
+| CI | GitHub Actions 矩阵：**ubuntu + windows + macos** × Node 18/20/22 |
+
 ## 工作原理
 
 ```
@@ -80,6 +94,9 @@ dsh-plugin-hot-toggle/
 ├── src/client.js        # Web half 源码（React）
 ├── lib/client.js        # Web half 构建产物（生成，勿手改）
 ├── scripts/build.mjs    # 零依赖 client bundle 构建
+├── scripts/screenshot.mjs   # headless-Chrome 截图（CDP，零依赖）
+├── scripts/verify-render.mjs # 验证「启停管理」标签页已渲染
+├── scripts/debug-dom.mjs    # DOM/slot 调试辅助
 ├── tests/patch.test.js  # 单元测试（node:test）
 └── .github/workflows/ci.yml  # CI：构建 + 产物新鲜度检查 + 测试
 ```

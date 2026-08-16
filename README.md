@@ -47,6 +47,20 @@ dsh plugin --profile web add github:5102a/dsh-plugin-hot-toggle
 
 After installation, start DSH (or let HMR apply it) and open **Settings → Plugins → 启停管理**.
 
+## Platform support
+
+The plugin runs on **Windows, macOS, and Linux** — the three platforms DeepSeek Harness itself supports.
+
+| Concern | Guarantee |
+| --- | --- |
+| Host half | All filesystem paths go through `node:path` (`join`/`dirname`) and `fileURLToPath`; no hardcoded separators |
+| Persistence | Patch-layer writes use `readFileSync`/`writeFileSync(…, 'utf8')` with paths derived from the Loader include |
+| HTTP API | `/plugin-hot-toggle/api/*` is a URL route — platform-independent |
+| Client half | Pure browser `fetch` + React; no `process.platform`/`navigator.platform` branches |
+| Build | `scripts/build.mjs` resolves paths from `import.meta.url` via `fileURLToPath` + `join` |
+| Dev tooling | Chrome/Edge discovery honors `CHROME_PATH`/`CHROME_BIN` or a cross-platform candidate list; `DSH_URL` overrides the target origin |
+| CI | GitHub Actions matrix: **ubuntu + windows + macos** × Node 18/20/22 |
+
 ## How it works
 
 ```
@@ -80,6 +94,9 @@ dsh-plugin-hot-toggle/
 ├── src/client.js        # Web half source (React)
 ├── lib/client.js        # Web half build artifact (generated, do not edit)
 ├── scripts/build.mjs    # zero-dep client bundle build
+├── scripts/screenshot.mjs   # headless-Chrome UI screenshot (CDP, zero deps)
+├── scripts/verify-render.mjs # verify the 启停管理 tab rendered
+├── scripts/debug-dom.mjs    # DOM/slot debugging helper
 ├── tests/patch.test.js  # unit tests (node:test)
 └── .github/workflows/ci.yml  # CI: build + artifact freshness + tests
 ```
