@@ -1,10 +1,20 @@
 // Verify the 启停管理 tab rendered in headless Chrome.
 import { spawn } from 'node:child_process'
+import { existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-const CHROME = process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+const CHROME = process.env.CHROME_PATH || process.env.CHROME_BIN || [
+  'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+  'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+  'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+  '/usr/bin/google-chrome',
+  '/usr/bin/chromium',
+  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+].find((p) => { try { return existsSync(p) } catch { return false } })
 const PORT = 9336
+// DSH web origin to verify (official default; override with $DSH_URL).
+const TARGET = process.env.DSH_URL || 'http://127.0.0.1:3080/'
 
 function cdp(wsUrl) {
   const ws = new WebSocket(wsUrl)
@@ -64,7 +74,7 @@ try {
   await client.ready
   await client.call('Page.enable')
   await client.call('Runtime.enable')
-  await client.call('Page.navigate', { url: 'http://127.0.0.1:3080/' })
+  await client.call('Page.navigate', { url: TARGET })
   await wait(5000)
 
   await click(client, `(() => { const el = document.querySelector('[data-slot="sidebar.settings"] button'); if (!el) return {ok:false}; const r = el.getBoundingClientRect(); return {ok:true,x:r.left+r.width/2,y:r.top+r.height/2} })()`)

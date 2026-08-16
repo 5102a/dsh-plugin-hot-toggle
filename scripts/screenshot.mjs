@@ -5,12 +5,20 @@
  * Usage: node scripts/screenshot.mjs <out.png> [--viewport 1440,900]
  */
 import { spawn } from 'node:child_process'
-import { writeFileSync } from 'node:fs'
+import { writeFileSync, existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-const CHROME = process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const TARGET = 'http://127.0.0.1:3080/'
+const CHROME = process.env.CHROME_PATH || process.env.CHROME_BIN || [
+  'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+  'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+  'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+  '/usr/bin/google-chrome',
+  '/usr/bin/chromium',
+  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+].find((p) => { try { return existsSync(p) } catch { return false } })
+// DSH web origin to capture (official default; override with $DSH_URL).
+const TARGET = process.env.DSH_URL || 'http://127.0.0.1:3080/'
 const PORT = 9333
 
 const args = process.argv.slice(2)

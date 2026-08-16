@@ -4,11 +4,21 @@
  * Usage: node scripts/debug-dom.mjs
  */
 import { spawn } from 'node:child_process'
+import { existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-const CHROME = process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+const CHROME = process.env.CHROME_PATH || process.env.CHROME_BIN || [
+  'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+  'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+  'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+  '/usr/bin/google-chrome',
+  '/usr/bin/chromium',
+  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+].find((p) => { try { return existsSync(p) } catch { return false } })
 const PORT = 9334
+// DSH web origin to inspect (official default; override with $DSH_URL).
+const TARGET = process.env.DSH_URL || 'http://127.0.0.1:3080/'
 
 function cdp(wsUrl) {
   const ws = new WebSocket(wsUrl)
@@ -60,7 +70,7 @@ async function main() {
   await client.ready
   await client.call('Page.enable')
   await client.call('Runtime.enable')
-  await client.call('Page.navigate', { url: 'http://127.0.0.1:3080/' })
+  await client.call('Page.navigate', { url: TARGET })
   await wait(5000)
 
   const dump = await client.call('Runtime.evaluate', {
