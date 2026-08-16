@@ -19,6 +19,8 @@
     "index.d.ts",
     "lib/client.js",
     "cordis.patch.yml",
+    "docs/screenshot-en.png",
+    "docs/screenshot-zh.png",
     "README.md",
     "README.zh.md",
     "LICENSE"

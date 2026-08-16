@@ -61,7 +61,7 @@ dsh-plugin-hot-toggle/
 
 ## Publishing SOP / 发布流程
 
-1. **Preflight:** `npm run check`; `npm pack --dry-run` → expect exactly 8 files (LICENSE, README.md, README.zh.md, cordis.patch.yml, index.d.ts, index.js, lib/client.js, package.json). 预检：check + pack 期望恰好 8 个文件。
+1. **Preflight:** `npm run check`; `npm pack --dry-run` → expect exactly 10 files (LICENSE, README.md, README.zh.md, cordis.patch.yml, index.d.ts, index.js, lib/client.js, docs/screenshot-en.png, docs/screenshot-zh.png, package.json). 预检：check + pack 期望恰好 10 个文件（含两张多语言截图）。
 2. **Name availability** (first release only): `npm view dsh-plugin-hot-toggle` → 404 means free. 首次发布前确认包名空闲。
 3. **Tag + push:**
    ```sh
@@ -84,7 +84,7 @@ dsh-plugin-hot-toggle/
 ## Screenshot SOP / 截图流程（README 图）
 
 1. Start DSH with the plugin installed; confirm `GET /plugin-hot-toggle/api/list` returns 200. 启动带插件的 DSH。
-2. `node scripts/screenshot.mjs docs/screenshot.png` — navigates Settings → Plugins → 启停管理 with real mouse events. 用 CDP 真实鼠标事件导航并截图。
+2. `node scripts/screenshot.mjs docs/screenshot-zh.png` — navigates Settings → Plugins → 启停管理 with real mouse events; capture per locale (zh/en) as needed. 用 CDP 真实鼠标事件导航并截图；按语言（zh/en）分别产出 `docs/screenshot-zh.png` / `docs/screenshot-en.png`。
 3. Verify: `node scripts/verify-render.mjs` must report `hptClasses > 0`, `toggles == <entry count>`, and a `N / N 个插件` meta line. 验证截图内容。
 4. `CHROME_PATH` / `DSH_URL` env vars override Chrome discovery and the target origin. 环境变量可覆盖 Chrome 路径与目标地址。
 

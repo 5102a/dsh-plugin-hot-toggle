@@ -13,7 +13,9 @@
 
 ## 功能特性
 
-![启停管理界面](./docs/screenshot.png)
+设置页中的「启停管理」标签页：
+
+![启停管理界面（中文界面）](./docs/screenshot-zh.png)
 
 - **热启停**：调用 Cordis Loader 官方 `Entry.update({ disabled })`——停用即 dispose 插件 fiber，启用即重新 import 启动，进程内立即生效，无需重启 DSH。
 - **持久化**：启停状态写入当前 profile 的用户 patch 层（`$DSH_HOME/profiles/<profile>/cordis.patch.yml`），由官方 HMR watcher 保存即热应用，**重启后保持**。

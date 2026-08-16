@@ -13,7 +13,9 @@ Hot-toggle any installed plugin from the DeepSeek Harness Web settings page (Plu
 
 ## Features
 
-![启停管理 tab](./docs/screenshot.png)
+The 启停管理 (Plugin Toggle) tab in the Web settings:
+
+![Plugin Toggle tab (English UI)](./docs/screenshot-en.png)
 
 - **Hot toggle**: calls the official Cordis Loader `Entry.update({ disabled })` — disabling disposes the plugin fiber, enabling re-imports and starts it, all in-process with instant effect. No DSH restart needed.
 - **Persistent**: the toggle state is written to the profile patch layer (`$DSH_HOME/profiles/<profile>/cordis.patch.yml`) and hot-applied by the official HMR watcher on save — **survives restarts**.

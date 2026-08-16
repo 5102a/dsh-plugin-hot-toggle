@@ -22,7 +22,7 @@ const TARGET = process.env.DSH_URL || 'http://127.0.0.1:3080/'
 const PORT = 9333
 
 const args = process.argv.slice(2)
-const out = args[0] || 'docs/screenshot.png'
+const out = args[0] || 'docs/screenshot-zh.png'
 const viewport = (args.find((a) => a.startsWith('--viewport=')) || '').split('=')[1] || '1440,900'
 const [vw, vh] = viewport.split(',').map(Number)
 
