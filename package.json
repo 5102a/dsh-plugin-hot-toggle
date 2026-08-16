@@ -2,23 +2,54 @@
   "name": "dsh-plugin-hot-toggle",
   "version": "0.1.0",
   "description": "在设置页插件列表中对所有已安装插件一键热启用/停用，立即生效，无需重启 DSH。Hot-toggle any installed plugin from the Web settings page — instant apply, no restart.",
-  "private": true,
   "type": "module",
   "main": "./index.js",
+  "types": "./index.d.ts",
   "exports": {
-    ".": "./index.js",
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
     "./client": "./lib/client.js",
     "./cordis.patch.yml": "./cordis.patch.yml",
     "./package.json": "./package.json"
   },
   "files": [
     "index.js",
+    "index.d.ts",
     "lib/client.js",
     "cordis.patch.yml",
     "README.md",
     "LICENSE"
   ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "prepare": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.js",
+    "check": "node scripts/build.mjs && node --test tests/*.test.js"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "cordis",
+    "plugin",
+    "hot-reload",
+    "loader"
+  ],
   "license": "MIT",
+  "author": "5102a",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/5102a/dsh-plugin-hot-toggle.git"
+  },
+  "bugs": {
+    "url": "https://github.com/5102a/dsh-plugin-hot-toggle/issues"
+  },
+  "homepage": "https://github.com/5102a/dsh-plugin-hot-toggle#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
@@ -26,5 +57,9 @@
     "client": {
       "platform": "web"
     }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "react": "^18.2.0"
   }
 }

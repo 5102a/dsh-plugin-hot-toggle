@@ -1,15 +1,4 @@
 /**
- * dsh-plugin-hot-toggle — client half (Web).
- * Generated from src/client.js by scripts/build.mjs — do not edit by hand.
- */
-window.__ModuleLoader__.load({
-  id: 'dsh-plugin-hot-toggle',
-  factory: (require) => {
-    var module = { exports: {} }
-    var exports = module.exports
-    Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-
-/**
  * dsh-plugin-hot-toggle — client half source (Web).
  *
  * This is the SOURCE of the shipped bundle. scripts/build.mjs wraps it into
@@ -246,8 +235,3 @@ function apply(ctx) {
 }
 
 module.exports = { inject, apply }
-
-
-    return module.exports
-  },
-})

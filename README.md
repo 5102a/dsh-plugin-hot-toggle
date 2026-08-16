@@ -1,47 +1,113 @@
 # dsh-plugin-hot-toggle
 
-在 DeepSeek Harness Web 设置页的「插件 → 启停管理」标签页中，对所有已安装插件**一键热启用/停用**——点击立即生效，无需重启 DSH。
+在 DeepSeek Harness Web 设置页的「插件 → 启停管理」标签页中，对所有已安装插件**一键热启用/停用**——点击立即生效，无需重启 DSH，状态自动持久化。
 
-Hot-toggle any installed plugin from the Web settings page (Plugins → 启停管理): stop or start a Loader entry in-process with instant effect and no DSH restart.
+Hot-toggle any installed plugin from the Web settings page (Plugins → 启停管理): stop or start a Cordis Loader entry in-process with instant effect, persisted across restarts.
+
+<p align="center">
+  <a href="https://github.com/topics/dsh-plugin"><img alt="dsh-plugin topic" src="https://img.shields.io/badge/topic-dsh--plugin-1f6feb?style=flat-square&logo=github"></a>
+  <a href="https://www.npmjs.com/package/dsh-plugin-hot-toggle"><img alt="npm" src="https://img.shields.io/npm/v/dsh-plugin-hot-toggle?style=flat-square"></a>
+  <a href="https://github.com/5102a/dsh-plugin-hot-toggle/actions"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/5102a/dsh-plugin-hot-toggle/ci.yml?style=flat-square"></a>
+  <a href="./LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square"></a>
+</p>
 
 ## 功能特性
 
-- **热启停**：调用 Cordis Loader 官方 `Entry.update({ disabled })`，停用即 dispose 插件 fiber，启用即重新 import 启动，进程内立即生效。
+- **热启停**：调用 Cordis Loader 官方 `Entry.update({ disabled })`——停用即 dispose 插件 fiber，启用即重新 import 启动，进程内立即生效，无需重启 DSH。
 - **持久化**：启停状态写入当前 profile 的用户 patch 层（`$DSH_HOME/profiles/<profile>/cordis.patch.yml`），由官方 HMR watcher 保存即热应用，**重启后保持**。
-- **来源过滤**：官方 / 核心 / 非官方（非官方 = `$DSH_HOME/plugins` 下存在同名目录，如 `dsh-memory-evolve`）。
-- **类型过滤**：内置框架 / 客户端 UI / 模型与推理 / 工具集 / 会话与存储 / 沙箱与执行 / 代理与规划 / 服务与集成 / 其他。
-- **排序**：最近安装优先（非官方插件在前）或按名称。
 - **安全保护**：`include`、`cordis:*`、loader/hmr/timer、动态插件宿主等系统核心条目禁止启停（标红「系统核心」）。
+- **多维筛选**（可叠加）：
+  - 状态：全部 / 已启用 / 已停用
+  - 来源：全部 / 官方 / 核心 / 非官方（非官方 = `$DSH_HOME/plugins` 下存在同名目录）
+  - 类型：内置框架 / 客户端 UI / 模型与推理 / 工具集 / 会话与存储 / 沙箱与执行 / 代理与规划 / 服务与集成 / 其他
+  - 搜索 + 计数显示（过滤数 / 总数）
+- **排序**：最近安装优先（非官方插件在前）或按名称。
 
 ## 安装
 
+### 从本地 checkout（开发）
+
 ```sh
-# 在插件仓库目录内，将 checkout 安装进 web profile
 dsh plugin --profile web add ./dsh-plugin-hot-toggle
+```
+
+### 从 npm（发布后）
+
+```sh
+dsh plugin --profile web add dsh-plugin-hot-toggle
+```
+
+### 从 git（发布后）
+
+```sh
+dsh plugin --profile web add github:5102a/dsh-plugin-hot-toggle
 ```
 
 安装后启动 DSH（或由 HMR 热应用），打开 **设置 → 插件 → 启停管理** 即可使用。
 
-## 结构
+## 工作原理
+
+```
+┌─────────────────────────────┐         ┌──────────────────────────────┐
+│  Web (client half)          │  fetch  │  Node (host half)             │
+│  settings.plugins.tab       │ ──────► │  /plugin-hot-toggle/api/*     │
+│  「启停管理」tab             │  JSON   │  ┌──────────────────────────┐ │
+│  - 列表 + 筛选 + 排序        │ ◄────── │  │ ctx.loader.entries()     │ │
+│  - 启停按钮                 │         │  │ entry.update({disabled}) │ │
+└─────────────────────────────┘         │  │ → fiber dispose / start  │ │
+                                        │  └──────────────────────────┘ │
+                                        │  ┌──────────────────────────┐ │
+                                        │  │ 持久化：写 cordis.patch  │ │
+                                        │  │ .yml → HMR 热应用        │ │
+                                        │  └──────────────────────────┘ │
+                                        └──────────────────────────────┘
+```
+
+- **Node half** 只使用公开 seam（`loader`、`webServer`、`dshHomePath`），零 DSH 核心改动；`webServer` 动态注入，TUI/headless 表面不会 pending。
+- **Web half** 通过同源 HTTP API 与 Node half 通信；写操作带 same-origin 校验（缺 Origin / 跨域拒绝 403）。
+- **Client bundle** 由 `src/client.js` 经零依赖构建脚本生成（`node scripts/build.mjs`），构建产物提交进仓库，git/npm 安装无需构建权限。
+
+## 目录结构
 
 ```
 dsh-plugin-hot-toggle/
-├── package.json         # dsh.bundle 声明（cordis.patch.yml）
-├── cordis.patch.yml     # bundle 层：插入自身插件行
+├── package.json         # dsh.bundle 声明 + peerDependencies + exports
+├── index.d.ts           # Host half 类型声明
 ├── index.js             # Node half：Loader 列表/启停 + webServer HTTP API
-└── lib/client.js        # Web half：启停管理 tab（ModuleLoader bundle）
+├── cordis.patch.yml     # bundle 层：插入自身插件行
+├── src/client.js        # Web half 源码（React）
+├── lib/client.js        # Web half 构建产物（生成，勿手改）
+├── scripts/build.mjs    # 零依赖 client bundle 构建
+├── tests/patch.test.js  # 单元测试（node:test）
+└── .github/workflows/ci.yml  # CI：构建 + 产物新鲜度检查 + 测试
 ```
-
-- Node half 只使用公开 seam（`loader`、`webServer`、`dshHomePath`），零 DSH 核心改动；`webServer` 动态注入，TUI/headless 表面不会 pending。
-- Web half 通过同源 HTTP API（`/plugin-hot-toggle/api`）与 Node half 通信；写操作带 same-origin 校验。
 
 ## API
 
 | Method | Path | Body | Returns |
 | --- | --- | --- | --- |
-| GET | `/plugin-hot-toggle/api/list` | — | `{ entries: [{ entryId, moduleName, enabled, fiberPhase, protected, category, type, community, sortKey }] }` |
-| POST | `/plugin-hot-toggle/api/setEnabled` | `{ entryId, enabled }` | `{ ok, entryId, enabled, fiberPhase, persisted, persistError }` |
+| GET | `/plugin-hot-toggle/api/list` | — | `{ entries: PluginEntry[] }` |
+| POST | `/plugin-hot-toggle/api/setEnabled` | `{ entryId, enabled }` | `SetEnabledResponse` |
 
-## License
+`PluginEntry` / `SetEnabledResponse` 见 [index.d.ts](./index.d.ts)。
 
-MIT
+## 开发
+
+```sh
+npm run build   # 由 src/client.js 生成 lib/client.js
+npm test        # node:test 单元测试
+npm run check   # build + test 一步到位
+```
+
+## 发布
+
+```sh
+npm run check && npm run build
+npm publish
+```
+
+> 包名 `dsh-plugin-hot-toggle` 发布前已用 `npm view` 确认可用。
+
+## 许可证
+
+MIT — 见 [LICENSE](./LICENSE)。
