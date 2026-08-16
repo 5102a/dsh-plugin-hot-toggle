@@ -14,6 +14,11 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         node-version: [18, 20, 22]
     runs-on: ${{ matrix.os }}
+    # Use bash on every runner (including Windows via Git Bash) so the
+    # multi-line steps keep one portable syntax across all three OSes.
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
@@ -27,6 +32,6 @@ jobs:
       - name: Verify bundle is up to date
         run: |
           node scripts/build.mjs
-          git diff --exit-code lib/client.js || (echo "lib/client.js is stale — run npm run build and commit"; exit 1)
+          git diff --exit-code -- lib/client.js || (echo "lib/client.js is stale — run npm run build and commit"; exit 1)
       - name: Run tests
         run: npm test
