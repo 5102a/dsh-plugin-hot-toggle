@@ -21,6 +21,10 @@ jobs:
           node-version: 22
           # No registry-url: that would write an _authToken line into
           # .npmrc and make npm skip OIDC detection for trusted publishing.
+      # Trusted publishing (OIDC) requires npm >= 11.5.1; Node 22 ships
+      # npm 10.x, so upgrade the runner's npm first.
+      - name: Upgrade npm for OIDC trusted publishing
+        run: npm install -g npm@latest
       - name: Verify bundle is up to date
         run: |
           node scripts/build.mjs
