@@ -22,6 +22,10 @@ jobs:
           git diff --exit-code -- lib/client.js || (echo "lib/client.js is stale — run npm run build and commit"; exit 1)
       - name: Run tests
         run: npm test
+      - name: Sync package version to tag
+        # npm pack names the tarball from package.json's version; keep it
+        # aligned with the git tag (vX.Y.Z -> X.Y.Z) so release assets match.
+        run: npm version ${GITHUB_REF_NAME#v} --no-git-tag-version --allow-same-version
       - name: Build release tarball
         run: npm pack
       - name: Compute SHA-256 checksum
