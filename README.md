@@ -127,6 +127,8 @@ npm publish
 
 > The name `dsh-plugin-hot-toggle` was verified available with `npm view` before release.
 
+> **Note on peer-dependency warnings**: the package declares `@deepseek-ai/cordis` and `react` as peer dependencies (the same pattern as the official `@deepseek-ai/*` plugins). DSH resolves them from its own installation via the profile's flat fallback, so an "unmet peer" warning during `dsh plugin add` is expected and harmless.
+
 ## License
 
 MIT — see [LICENSE](./LICENSE).

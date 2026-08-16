@@ -127,6 +127,8 @@ npm publish
 
 > 包名 `dsh-plugin-hot-toggle` 发布前已用 `npm view` 确认可用。
 
+> **关于 peer 依赖警告**：本包声明了 `@deepseek-ai/cordis` 与 `react` 作为 peer 依赖（与官方 `@deepseek-ai/*` 插件相同的模式）。DSH 通过 profile 的 flat fallback 从自身安装目录解析这些依赖，因此 `dsh plugin add` 时出现 "unmet peer" 警告属于预期且无害。
+
 ## 许可证
 
 MIT — 见 [LICENSE](./LICENSE)。
