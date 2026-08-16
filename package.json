@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-hot-toggle",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "在设置页插件列表中对所有已安装插件一键热启用/停用，立即生效，无需重启 DSH。Hot-toggle any installed plugin from the Web settings page — instant apply, no restart.",
   "type": "module",
   "main": "./index.js",
