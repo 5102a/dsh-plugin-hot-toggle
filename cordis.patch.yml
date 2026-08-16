@@ -1,0 +1,7 @@
+# dsh-plugin-hot-toggle bundle layer: inserts the plugin row into the
+# effective entry list. The row name is the package specifier, resolved
+# through the profile's pnpm closure after `dsh plugin add`.
+- insert:
+    - id: dsh-plugin-hot-toggle
+      name: dsh-plugin-hot-toggle
+      config: {}

@@ -1,0 +1,30 @@
+{
+  "name": "dsh-plugin-hot-toggle",
+  "version": "0.1.0",
+  "description": "在设置页插件列表中对所有已安装插件一键热启用/停用，立即生效，无需重启 DSH。Hot-toggle any installed plugin from the Web settings page — instant apply, no restart.",
+  "private": true,
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "lib/client.js",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "license": "MIT",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web"
+    }
+  }
+}
